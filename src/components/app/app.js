@@ -18,6 +18,7 @@ export default class App extends Component {
       this.createTodoItem("Have a lunch"),
     ],
     term: "",
+    filter: "all", // All, Active, Done
   };
 
   createTodoItem(label) {
@@ -81,7 +82,6 @@ export default class App extends Component {
   onSearchChange = (term) => {
     this.setState({ term });
   };
-
   search(items, term) {
     if (term.length === 0) {
       return items;
@@ -92,9 +92,25 @@ export default class App extends Component {
     });
   }
 
+  onFilterChange = (filter) => {
+    this.setState({ filter });
+  };
+  filter(items, filter) {
+    switch (filter) {
+      case "all":
+        return items;
+      case "active":
+        return items.filter((item) => !item.done);
+      case "done":
+        return items.filter((item) => item.done);
+      default:
+        return items;
+    }
+  }
+
   render() {
-    const { todoData, term } = this.state;
-    const visibleItems = this.search(todoData, term);
+    const { todoData, term, filter } = this.state;
+    const visibleItems = this.filter(this.search(todoData, term), filter);
     const doneCount = todoData.filter((el) => el.done).length;
     const todoCount = todoData.length - doneCount;
 
@@ -103,7 +119,10 @@ export default class App extends Component {
         <AppHeader toDo={todoCount} done={doneCount} />
         <div className="top-panel d-flex">
           <SearchPanel onSearchChange={this.onSearchChange} />
-          <ItemStatusFilter />
+          <ItemStatusFilter
+            filter={filter}
+            onFilterChange={this.onFilterChange}
+          />
         </div>
 
         <TodoList
@@ -118,27 +137,3 @@ export default class App extends Component {
     );
   }
 }
-
-// const App = () => {
-//   const todoData = [
-//     { label: "Drink Coffee", important: false, id: 1 },
-//     { label: "Make Awesome App", important: true, id: 2 },
-//     { label: "Have a lunch", important: false, id: 3 },
-//   ];
-
-//   return (
-//     <div className="todo-app">
-//       <AppHeader toDo={1} done={3} />
-//       <div className="top-panel d-flex">
-//         <SearchPanel />
-//         <ItemStatusFilter />
-//       </div>
-
-//       <TodoList
-//         todos={todoData}
-//         onDeleted={ (id) => console.log("del", id)}
-//       />
-//     </div>
-//   );
-// };
-// export default App;
